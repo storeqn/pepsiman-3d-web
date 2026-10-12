@@ -1,0 +1,120 @@
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { Scene } from "@babylonjs/core/scene";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { material } from "./materials";
+import type { Runner } from "../core/simulation";
+export class AnimationSystem {
+  root: TransformNode;
+  limbs: TransformNode[] = [];
+  constructor(scene: Scene) {
+    this.root = new TransformNode("temporary-articulated-runner", scene);
+    const silver = material(scene, "silver armor", "#b9cbd3", 0.82, 0.28),
+      blue = material(scene, "cobalt panels", "#07658e", 0.55, 0.3),
+      dark = material(scene, "joints", "#13232d", 0.3, 0.5);
+    const part = (
+      name: string,
+      position: Vector3,
+      scale: Vector3,
+      mat = silver,
+      parent = this.root,
+    ) => {
+      const m = MeshBuilder.CreateSphere(
+        name,
+        { diameter: 1, segments: 16 },
+        scene,
+      );
+      m.parent = parent;
+      m.position = position;
+      m.scaling = scale;
+      m.material = mat;
+      return m;
+    };
+    part("rib armor", new Vector3(0, 1.37, 0), new Vector3(0.73, 0.69, 0.4));
+    part(
+      "abdominal suit",
+      new Vector3(0, 1.06, 0),
+      new Vector3(0.46, 0.42, 0.32),
+      blue,
+    );
+    part("hips", new Vector3(0, 0.91, 0), new Vector3(0.55, 0.27, 0.36), dark);
+    part("helmet", new Vector3(0, 1.92, 0), new Vector3(0.43, 0.51, 0.44));
+    part(
+      "visor",
+      new Vector3(0, 1.98, 0.19),
+      new Vector3(0.35, 0.16, 0.14),
+      blue,
+    );
+    part(
+      "spine light",
+      new Vector3(0, 1.4, -0.215),
+      new Vector3(0.12, 0.44, 0.07),
+      blue,
+    );
+    for (const side of [-1, 1]) {
+      for (const arm of [false, true]) {
+        const pivot = new TransformNode(arm ? "shoulder" : "hip", scene);
+        pivot.parent = this.root;
+        pivot.position.set(side * (arm ? 0.43 : 0.19), arm ? 1.61 : 0.94, 0);
+        this.limbs.push(pivot);
+        part(
+          "joint",
+          Vector3.Zero(),
+          new Vector3(0.19, 0.19, 0.19),
+          dark,
+          pivot,
+        );
+        part(
+          "upper armor",
+          new Vector3(0, -0.2, 0),
+          new Vector3(arm ? 0.19 : 0.25, 0.43, 0.22),
+          silver,
+          pivot,
+        );
+        const lower = new TransformNode("hinge", scene);
+        lower.parent = pivot;
+        lower.position.y = -0.4;
+        lower.rotation.x = arm ? -0.5 : 0.25;
+        part(
+          "hinge",
+          Vector3.Zero(),
+          new Vector3(0.18, 0.18, 0.18),
+          blue,
+          lower,
+        );
+        part(
+          "lower armor",
+          new Vector3(0, -0.18, 0),
+          new Vector3(0.18, 0.39, 0.21),
+          silver,
+          lower,
+        );
+        part(
+          arm ? "glove" : "boot",
+          new Vector3(0, -0.39, arm ? 0 : 0.09),
+          new Vector3(0.21, 0.17, arm ? 0.21 : 0.39),
+          dark,
+          lower,
+        );
+      }
+    }
+  }
+  update(p: Runner, moving: boolean) {
+    this.root.position.set(p.x, p.y, p.z);
+    this.root.rotation.z = -p.vx * 0.025;
+    this.root.rotation.x = p.slide > 0 ? -1.1 : 0.06;
+    this.root.scaling.y = p.slide > 0 ? 0.5 : 1;
+    const phase = p.elapsed * 13;
+    this.limbs.forEach(
+      (l, i) =>
+        (l.rotation.x = moving
+          ? p.y > 0
+            ? i % 2
+              ? 0.6
+              : -0.6
+            : Math.sin(phase + (i < 2 ? 0 : Math.PI) + (i % 2 ? Math.PI : 0)) *
+              0.7
+          : 0),
+    );
+  }
+}
