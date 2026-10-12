@@ -13,6 +13,8 @@ export function material(
   m.albedoColor = Color3.FromHexString(color);
   m.metallic = metal;
   m.roughness = rough;
+  m.useRadianceOverAlpha = false;
+  m.backFaceCulling = true;
   return m;
 }
 export function asphalt(scene: Scene) {
@@ -28,6 +30,8 @@ export function asphalt(scene: Scene) {
       c.fillRect(x, y, 1, 1);
     }
   t.update();
+  t.wrapU = 1;
+  t.wrapV = 1;
   t.uScale = 3;
   t.vScale = 8;
   m.albedoTexture = t;
