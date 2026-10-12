@@ -7,6 +7,7 @@ import {
   overlaps,
   STEP,
   stepRunner,
+  speedAt,
 } from "../src/core/simulation";
 import { decode, SaveSystem } from "../src/systems/save";
 const neutral = { axis: 0, jump: false, slide: false };
@@ -64,8 +65,8 @@ describe("fair collision and level completion", () => {
     expect(overlaps(p, encounter(0)[0], 43)).toBe(false);
   });
   it("slides below overhead obstacles but not vehicles", () => {
-    const p = { ...initialRunner(), z: 99, x: 2.8, slide: 0.5 };
-    expect(overlaps(p, encounter(2)[0], 98)).toBe(false);
+    const p = { ...initialRunner(), z: 121, x: 2.8, slide: 0.5 };
+    expect(overlaps(p, encounter(2)[0], 120)).toBe(false);
     p.slide = 0;
     expect(overlaps(p, encounter(2)[0], 98)).toBe(true);
   });
@@ -85,8 +86,8 @@ describe("fair collision and level completion", () => {
     }
     expect(hits).toBe(0);
     expect(p.z).toBe(LEVEL_LENGTH);
-    expect(p.elapsed).toBeGreaterThan(180);
-    expect(p.elapsed).toBeLessThan(300);
+    expect(p.elapsed).toBeGreaterThan(110);
+    expect(p.elapsed).toBeLessThan(170);
   });
 });
 describe("versioned save validation", () => {
@@ -114,5 +115,19 @@ describe("versioned save validation", () => {
     const save = new SaveSystem();
     expect(save.data.best).toBe(0);
     expect(save.persist()).toBe(false);
+  });
+});
+
+describe("dollar runner pacing", () => {
+  it("launches fast with capped acceleration", () => {
+    expect(speedAt(0,0)).toBe(14);
+    expect(speedAt(100,10)).toBeGreaterThan(17);
+    expect(speedAt(2400,200)).toBeCloseTo(21);
+  });
+  it("has predictable gaps at top speed", () => {
+    for(let i=0;i<50;i++){
+      const space=encounter(i+1)[0].z-encounter(i)[0].z;
+      expect(space).toBeGreaterThanOrEqual(speedAt(2400,200)*1.8);
+    }
   });
 });
