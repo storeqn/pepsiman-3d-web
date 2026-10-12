@@ -43,9 +43,9 @@ export class WorldStreaming {
     ctx.fillStyle="#e1ebd2";ctx.fillRect(0,0,512,256);
     ctx.strokeStyle="#326443";ctx.lineWidth=14;ctx.strokeRect(12,12,488,232);
     ctx.strokeStyle="#8da887";ctx.lineWidth=5;ctx.strokeRect(29,29,454,198);
-    ctx.fillStyle="#305d3d";ctx.textAlign="center";
-    ctx.font="bold 105px Georgia";ctx.fillText("$100",256,155);
-    ctx.font="bold 22px Arial";ctx.fillText("DOLLAR - GAME MONEY",256,195);
+    ctx.fillStyle="#305d3d";
+    ctx.font="bold 105px Georgia";ctx.fillText("$100",125,155);
+    ctx.font="bold 22px Arial";ctx.fillText("DOLLAR - GAME MONEY",112,195);
     note.update();this.cash.albedoTexture=note;
     this.green = material(scene, "iraqi-palm-green", "#507b4f");
     this.facadePalette = ["#d4b997", "#b9a58a", "#cb936e", "#a6ada5", "#ead0aa"].map((c, i) => material(scene, "facade-palette-" + i, c, 0.05, 0.83));
