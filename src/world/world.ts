@@ -23,6 +23,7 @@ export class WorldStreaming {
   private rubber: PBRMaterial;
   private gold: PBRMaterial;
   private green: PBRMaterial;
+  private facadePalette: PBRMaterial[];
   constructor(private scene: Scene) {
     this.road = asphalt(scene);
     this.concrete = material(scene, "limestone", "#b7ad9c");
@@ -34,6 +35,7 @@ export class WorldStreaming {
     this.gold = material(scene, "energy", "#9aefca", 0.55, 0.25);
     this.gold.emissiveColor = Color3.FromHexString("#3a8869");
     this.green = material(scene, "foliage", "#537765");
+    this.facadePalette = ["#bcac92", "#7d9696", "#a88069", "#738997", "#c5bdae"].map((c, i) => material(scene, "facade-palette-" + i, c, 0.05, 0.83));
     for (let i = 0; i < 8; i++) {
       const root = new TransformNode("city-segment-" + i, scene);
       root.position.z = (i - 1) * 40;
@@ -124,13 +126,7 @@ export class WorldStreaming {
       for (let n = 0; n < 2; n++) {
         const z = n * 20 + 10;
         const height = 7 + ((index * 7 + n * 3) % 5) * 2;
-        const facade = material(
-          this.scene,
-          "facade " + index + " " + n + " " + side,
-          ["#bcac92", "#7d9696", "#a88069", "#738997", "#c5bdae"][
-            (index + n + (side + 1)) % 5
-          ],
-        );
+        const facade = this.facadePalette[(index + n + (side + 1)) % this.facadePalette.length];
         this.box(
           root,
           "building",
@@ -142,6 +138,13 @@ export class WorldStreaming {
           17,
           facade,
         );
+        // Building silhouettes vary instead of repeating identical rectangular roofs.
+        this.box(root, "roof parapet", side * 10.5, height + 0.42, z - 7.7, 6.3, 0.85, 0.26, this.concrete);
+        this.box(root, "roof service housing", side * 10.5, height + 0.85, z + 3, 2.1, 1.7, 2.8, this.blue);
+        if ((index + n) % 2 === 0) {
+          this.box(root, "shop decorative light", side * 7.02, 3.04, z, 0.12, 0.12, 11, this.gold);
+          this.box(root, "storefront split", side * 7.03, 1.55, z, 0.1, 2.5, 0.15, this.white);
+        }
         this.box(
           root,
           "cornice",
@@ -311,6 +314,13 @@ export class WorldStreaming {
       this.box(root, "store threshold", side * 6.95, 0.28, 20, 0.8, 0.12, 7, this.white);
       this.box(root, "street bollard", side * 5.55, 0.52, 28, 0.17, 1.04, 0.17, this.rubber);
       this.box(root, "street bollard highlight", side * 5.55, 0.85, 28, 0.18, 0.12, 0.18, this.orange);
+    }
+    // Asphalt edge paint makes road boundaries legible in the chase camera.
+    for (const side of [-1, 1]) {
+      this.box(root, "road edge line", side * 4.69, 0.018, 20, 0.08, 0.012, 39, this.white);
+      for (let z = 4; z < 40; z += 8) {
+        this.box(root, "sidewalk seam", side * 6.1, 0.282, z, 2.12, 0.012, 0.055, this.rubber);
+      }
     }
     for (let z = 2; z < 40; z += 6)
       this.box(root, "lane marking", 0, 0.015, z, 0.12, 0.018, 2.6, this.white);
