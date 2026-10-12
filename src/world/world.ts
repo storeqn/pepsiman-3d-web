@@ -446,7 +446,25 @@ export class WorldStreaming {
     }
     return root;
   }
+  private bursts: {node: TransformNode; at: number}[] = [];
+  collect(id: number) {
+    const v=this.visuals.get(id);
+    if(!v)return;
+    const node=new TransformNode("cash-burst",this.scene);
+    node.position.set(v.position.x,1,v.position.z);
+    for(let i=0;i<5;i++){
+      const a=i*Math.PI*2/5;
+      this.box(node,"gold-spark",Math.cos(a)*0.4,Math.sin(a)*0.4,0,0.1,0.1,0.06,this.gold);
+    }
+    this.bursts.push({node,at:v.position.z});
+  }
   update(z: number) {
+    this.bursts=this.bursts.filter((b)=>{
+      const d=Math.max(0,z-b.at);
+      b.node.scaling.setAll(1+d/2);
+      if(d>4){b.node.dispose(false,true);return false;}
+      return true;
+    });
     for (const chunk of this.chunks)
       if (chunk.position.z + 40 < z - 45) chunk.position.z += 320;
     while (
@@ -481,6 +499,8 @@ export class WorldStreaming {
     }
   }
   reset() {
+    for(const b of this.bursts)b.node.dispose(false,true);
+    this.bursts=[];
     for (const o of this.obstacles) {
       const v = this.visuals.get(o.id);
       if (v) {
