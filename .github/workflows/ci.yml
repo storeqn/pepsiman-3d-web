@@ -1,4 +1,4 @@
-name: Silver Rush checks
+name: Iraqi Dollar Runner checks
 on:
   push:
   pull_request:

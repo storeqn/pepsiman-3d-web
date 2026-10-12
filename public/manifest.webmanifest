@@ -1,15 +1,15 @@
 {
   "id": "/",
-  "name": "Silver Rush 3D",
-  "short_name": "Silver Rush",
-  "description": "لعبة ركض ثلاثية الأبعاد — نسخة تطوير",
+  "name": "صايد الدولار 3D",
+  "short_name": "صايد الدولار",
+  "description": "الحق الدولار قبل لا يطير! لعبة ركض عراقية ثلاثية الأبعاد",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#09151b",
-  "theme_color": "#09151b",
+  "background_color": "#103a33",
+  "theme_color": "#103a33",
   "icons": [
     {
       "src": "/icon-192.png",

@@ -2,7 +2,7 @@ import "./style.css";
 import { Game } from "./core/game";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML =
-  '<div class="loading"><b>SILVER RUSH</b><p>جارٍ تجهيز شوارع المدينة…</p></div>';
+  '<div class="loading"><b>صايد الدولار 3D</b><p>جارٍ تجهيز شوارع المدينة…</p></div>';
 requestAnimationFrame(() =>
   setTimeout(() => {
     try {
@@ -10,7 +10,7 @@ requestAnimationFrame(() =>
         document.querySelector<HTMLCanvasElement>("#game")!,
       );
       if (import.meta.env.DEV)
-        (window as Window & { __silverRush?: Game }).__silverRush = game;
+        (window as Window & { __dollarRunner?: Game }).__dollarRunner = game;
     } catch (error) {
       app.innerHTML =
         '<div class="loading"><h1>تعذر تشغيل اللعبة</h1><p>جرّب متصفحاً حديثاً مع تفعيل تسريع الرسومات.</p><button onclick="location.reload()">إعادة المحاولة</button></div>';
