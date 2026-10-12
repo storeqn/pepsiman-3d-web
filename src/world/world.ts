@@ -22,20 +22,33 @@ export class WorldStreaming {
   private blue: PBRMaterial;
   private rubber: PBRMaterial;
   private gold: PBRMaterial;
+  private cash: PBRMaterial;
+  private taxi: PBRMaterial;
   private green: PBRMaterial;
   private facadePalette: PBRMaterial[];
   constructor(private scene: Scene) {
     this.road = asphalt(scene);
-    this.concrete = material(scene, "limestone", "#b7ad9c");
+    this.concrete = material(scene, "iraqi-limestone", "#d5c09e");
     this.glass = material(scene, "blue glass", "#1c485b", 0.55, 0.22);
     this.white = material(scene, "ivory", "#eee9d6");
     this.orange = material(scene, "safety orange", "#f18a3f");
     this.blue = material(scene, "petrol", "#2c7888", 0.4, 0.33);
     this.rubber = material(scene, "rubber", "#16252b");
-    this.gold = material(scene, "energy", "#9aefca", 0.55, 0.25);
-    this.gold.emissiveColor = Color3.FromHexString("#3a8869");
-    this.green = material(scene, "foliage", "#537765");
-    this.facadePalette = ["#bcac92", "#7d9696", "#a88069", "#738997", "#c5bdae"].map((c, i) => material(scene, "facade-palette-" + i, c, 0.05, 0.83));
+    this.gold = material(scene,"dollar-sparkles","#e1cd69",0.18,0.39);
+    this.gold.emissiveColor=Color3.FromHexString("#806d20");
+    this.taxi=material(scene,"iraqi-yellow-taxi","#eec12d",0.12,0.48);
+    this.cash=material(scene,"100-dollar-banknote","#ffffff",0,0.7);
+    const note=new DynamicTexture("authored-dollar-note",{width:512,height:256},scene,false);
+    const ctx=note.getContext();
+    ctx.fillStyle="#e1ebd2";ctx.fillRect(0,0,512,256);
+    ctx.strokeStyle="#326443";ctx.lineWidth=14;ctx.strokeRect(12,12,488,232);
+    ctx.strokeStyle="#8da887";ctx.lineWidth=5;ctx.strokeRect(29,29,454,198);
+    ctx.fillStyle="#305d3d";
+    ctx.font="bold 105px Georgia";ctx.fillText("$100",125,155);
+    ctx.font="bold 22px Arial";ctx.fillText("DOLLAR - GAME MONEY",112,195);
+    note.update();this.cash.albedoTexture=note;
+    this.green = material(scene, "iraqi-palm-green", "#507b4f");
+    this.facadePalette = ["#d4b997", "#b9a58a", "#cb936e", "#a6ada5", "#ead0aa"].map((c, i) => material(scene, "facade-palette-" + i, c, 0.05, 0.83));
     for (let i = 0; i < 8; i++) {
       const root = new TransformNode("city-segment-" + i, scene);
       root.position.z = (i - 1) * 40;
@@ -47,7 +60,7 @@ export class WorldStreaming {
     this.box(finish, "finish crossbar", 0, 4.8, 0, 10, 0.35, 0.5, this.blue);
     for (const x of [-4.7, 4.7])
       this.box(finish, "finish pole", x, 2.4, 0, 0.22, 4.8, 0.22, this.white);
-    this.sign(finish, "FINISH / SILVER DISTRICT", 0, 4.8, -0.28, 7, 0.6);
+    this.sign(finish, "النهاية | صايد الدولار", 0, 4.8, -0.28, 7, 0.6);
     this.update(0);
   }
   box(
@@ -91,9 +104,9 @@ export class WorldStreaming {
       text,
       null,
       83,
-      "bold 40px sans-serif",
-      "#def4e8",
-      "#12333b",
+      "bold 43px Tahoma, Arial, sans-serif",
+      "#fff0bf",
+      "#164b3b",
       true,
     );
     const m = material(this.scene, text, "#ffffff");
@@ -195,7 +208,7 @@ export class WorldStreaming {
         // Street-facing fascia plus perpendicular corner shop signage.
         this.sign(
           root,
-          ["NORTH / COFFEE", "SILVER WORKS", "FRESH MARKET", "ARCADE"][
+          ["مقهى دجلة", "سوق القرنة", "تكسي بغداد", "أسواق الفرات"][
             index % 4
           ],
           side * 9.8,
@@ -204,6 +217,10 @@ export class WorldStreaming {
           5,
           0.75,
         );
+        // Arabic shopfront text and painted metal shutters.
+        this.sign(root,["بصرة الخير","دكان أبو علي","عصائر رمان","مطعم العافية"][(index+n)%4],side*9.8,4.94,z-8.59,5.3,0.75);
+        this.box(root,"market-shutter-post",side*7.1,1.45,z+4.3,0.12,2.2,0.12,this.orange);
+        this.box(root,"market-shutter-post",side*7.1,1.45,z-4.3,0.12,2.2,0.12,this.orange);
         this.box(
           root,
           "lamp pole",
@@ -283,6 +300,22 @@ export class WorldStreaming {
           0.55,
           this.blue,
         );
+      }
+    }
+    // Wires and utility poles outside collision lanes.
+    for (const side of [-1,1]) {
+      for (const z of [5,35]) {
+        this.box(root,"electricity-pole",side*6.82,3.8,z,0.18,7.6,0.18,this.rubber);
+        this.box(root,"electric-crossarm",side*6.82,6.9,z,1.1,0.13,0.13,this.concrete);
+      }
+      for(const dx of [-0.35,0.35]) {
+        const cable=MeshBuilder.CreateLines("hanging-cable",{points:[
+          new Vector3(side*6.82+dx,6.82,5),
+          new Vector3(side*6.82+dx,6.22,20),
+          new Vector3(side*6.82+dx,6.82,35)
+        ]},this.scene);
+        cable.color=Color3.FromHexString("#414342");
+        cable.parent=root;
       }
     }
     // Non-interactive roadside dressing stays outside the runner's collision lanes.
@@ -371,15 +404,12 @@ export class WorldStreaming {
     const root = new TransformNode(o.kind, this.scene);
     root.position.set(o.x, 0, o.z);
     if (o.kind === "coin") {
-      const ring = MeshBuilder.CreateTorus(
-        "energy ring",
-        { diameter: 0.62, thickness: 0.13, tessellation: 16 },
-        this.scene,
-      );
-      ring.parent = root;
-      ring.position.y = 1;
-      ring.rotation.x = Math.PI / 2;
-      ring.material = this.gold;
+      // Distinct 3D bundle of textured bills instead of an energy ring.
+      for(let i=0;i<3;i++){
+        const m=this.box(root,"rotating-dollar-banknote",0,0.98+i*0.055,0,0.87,0.46,0.024,this.cash);
+        m.rotation.y=i*0.11;
+      }
+      this.box(root,"money-bundle-band",0,1.05,0.04,0.13,0.53,0.045,this.gold);
     } else if (o.kind === "barrier") {
       this.box(root, "barrier body", 0, 0.58, 0, 2.4, 0.65, 0.28, this.orange);
       for (const x of [-0.9, 0.9])
@@ -402,11 +432,13 @@ export class WorldStreaming {
       for (const x of [-1.3, 1.3])
         this.box(root, "gantry post", x, 1.4, 0, 0.12, 2.8, 0.25, this.orange);
       this.box(root, "low beam", 0, 1.72, 0, 2.6, 1.1, 0.55, this.orange);
-      this.sign(root, "SLIDE ↓", 0, 2, -0.3, 2, 0.45);
+      this.sign(root, "انزلق ↓", 0, 2, -0.3, 2, 0.45);
     } else {
-      this.box(root, "car chassis", 0, 0.62, 0, 1.9, 0.6, 3.9, this.blue);
+      this.box(root, "taxi chassis", 0, 0.62, 0, 1.9, 0.6, 3.9, this.taxi);
       this.box(root, "car cabin", 0, 1.1, -0.15, 1.65, 0.7, 2.1, this.glass);
-      this.box(root, "car roof", 0, 1.49, -0.15, 1.7, 0.1, 2.1, this.blue);
+      this.box(root, "taxi roof", 0, 1.49, -0.15, 1.7, 0.1, 2.1, this.taxi);
+      this.box(root,"taxi roof light",0,1.73,-0.18,0.73,0.29,0.31,this.white);
+      this.box(root,"taxi checker",0,1.72,-0.346,0.53,0.11,0.014,this.rubber);
       for (const side of [-1, 1])
         for (const z of [-1.25, 1.25]) {
           const wheel = MeshBuilder.CreateCylinder(
@@ -434,11 +466,29 @@ export class WorldStreaming {
     }
     return root;
   }
+  private bursts: {node: TransformNode; at: number}[] = [];
+  collect(id: number) {
+    const v=this.visuals.get(id);
+    if(!v)return;
+    const node=new TransformNode("cash-burst",this.scene);
+    node.position.set(v.position.x,1,v.position.z);
+    for(let i=0;i<5;i++){
+      const a=i*Math.PI*2/5;
+      this.box(node,"gold-spark",Math.cos(a)*0.4,Math.sin(a)*0.4,0,0.1,0.1,0.06,this.gold);
+    }
+    this.bursts.push({node,at:v.position.z});
+  }
   update(z: number) {
+    this.bursts=this.bursts.filter((b)=>{
+      const d=Math.max(0,z-b.at);
+      b.node.scaling.setAll(1+d/2);
+      if(d>4){b.node.dispose(false,true);return false;}
+      return true;
+    });
     for (const chunk of this.chunks)
       if (chunk.position.z + 40 < z - 45) chunk.position.z += 320;
     while (
-      45 + this.nextEncounter * 27 <
+      45 + this.nextEncounter * 38 <
       Math.min(z + 210, LEVEL_LENGTH - 35)
     ) {
       for (const o of encounter(this.nextEncounter++)) {
@@ -469,6 +519,8 @@ export class WorldStreaming {
     }
   }
   reset() {
+    for(const b of this.bursts)b.node.dispose(false,true);
+    this.bursts=[];
     for (const o of this.obstacles) {
       const v = this.visuals.get(o.id);
       if (v) {

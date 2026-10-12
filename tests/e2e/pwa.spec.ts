@@ -9,7 +9,7 @@ test("production rendering, service worker and offline cold reload", async ({
     if (m.type() === "error") errors.push(m.text());
   });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "ابدأ الركض" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "يلا نركض!" })).toBeVisible();
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
@@ -18,10 +18,10 @@ test("production rendering, service worker and offline cold reload", async ({
     async () => await (await fetch("/manifest.webmanifest")).json(),
   );
   expect(manifest.display).toBe("standalone");
-  expect(await page.evaluate(() => "__silverRush" in window)).toBe(false);
+  expect(await page.evaluate(() => "__dollarRunner" in window)).toBe(false);
   await context.setOffline(true);
   await page.reload();
-  await page.getByRole("button", { name: "ابدأ الركض" }).click();
+  await page.getByRole("button", { name: "يلا نركض!" }).click();
   await expect(page.locator("#hud")).toBeVisible();
   await expect
     .poll(async () =>

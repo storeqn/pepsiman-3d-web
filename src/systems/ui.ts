@@ -17,7 +17,7 @@ export class UIManager {
     },
     private save: Save,
   ) {
-    this.root.innerHTML = `<header class="brand"><span class="brand-icon">S<span>↗</span></span><div dir="ltr">SILVER<span>RUSH</span><small>3D · FIRST RUN</small></div></header><div id="hud" hidden><div class="stats"><span>النقاط <b id="score">0</b></span><span>الطاقة <b id="coins">0</b></span><span>المحاولات <b id="lives">●●●</b></span></div><div class="progress"><i id="progress"></i></div><button id="pause" aria-label="إيقاف مؤقت">Ⅱ</button><div id="hint"></div></div><main id="panel"></main><div id="toast" role="status"></div><div id="touch" hidden><button data-move="-1" aria-label="يسار">←</button><button data-move="1" aria-label="يمين">→</button><span></span><button id="slide">انزلاق ↓</button><button id="jump">قفز ↑</button></div><footer>نسخة تطوير · شخصية وبيئة إجرائيتان مؤقتتان <span dir="ltr">PHASE 01 / DOWNTOWN</span></footer>`;
+    this.root.innerHTML = `<header class="brand"><span class="brand-icon">$<span>↗</span></span><div dir="rtl">صايد <span>الدولار</span><small>3D · الْحِق الدولار قبل لا يطير!</small></div></header><div id="hud" hidden><div class="stats"><span>النقاط <b id="score">0</b></span><span>الدولارات <b id="coins">$0</b></span><span>الفرص <b id="lives">●●●</b></span></div><div class="progress"><i id="progress"></i></div><button id="pause" aria-label="إيقاف مؤقت">Ⅱ</button><div id="hint"></div></div><main id="panel"></main><div id="toast" role="status"></div><div id="touch" hidden><button data-move="-1" aria-label="يسار">←</button><button data-move="1" aria-label="يمين">→</button><span></span><button id="slide">انزلاق ↓</button><button id="jump">قفز ↑</button></div><footer>صايد الدولار 3D · لعبة عراقية أصلية <span>IRAQI DOLLAR RUNNER</span></footer>`;
     this.hud = this.root.querySelector("#hud")!;
     this.panel = this.root.querySelector("#panel")!;
     this.message = this.root.querySelector("#toast")!;
@@ -52,19 +52,19 @@ export class UIManager {
       status !== "playing";
     this.panel.hidden = status === "playing";
     if (status === "menu") {
-      this.panel.innerHTML = `<div class="eyebrow">01 — SILVER DISTRICT</div><h1>المدينة لا تنتظر.<br><em>انطلق.</em></h1><p>اركض بين شوارع المدينة، اجمع الطاقة،<br>وتجاوز كل ما يعترض طريقك.</p><div class="level-tag"><span>◈</span><div><strong>DOWNTOWN RUSH</strong><small>٢٫٤ كم · نحو ٣ دقائق · مرحلة تجريبية</small></div></div><button class="primary" id="start">ابدأ الركض <span>↗</span></button><div class="menu-links"><button id="levels">المراحل</button><button id="settings">الإعدادات</button><button id="help">التحكم والتثبيت</button></div><div class="best">أفضل نتيجة <b>${this.save.best.toLocaleString("en")}</b></div>`;
+      this.panel.innerHTML = `<div class="eyebrow">01 — شوارع العراق</div><h1>صايد الدولار <em>3D</em></h1><p class="tagline">الحق الدولار قبل لا يطير!</p><p>اركض بالدشداشة والشماغ بين أسواقنا، اجمع رزم الدولارات وراوغ التكاسي والحواجز!</p><div class="level-tag"><span>◈</span><div><strong>صايد الدولار — شارع السوق</strong><small>٢٫٤ كم · شوارع وأسواق عراقية</small></div></div><button class="primary" id="start">يلا نركض! <span>↗</span></button><div class="menu-links"><button id="levels">المراحل</button><button id="settings">الإعدادات</button><button id="help">التحكم والتثبيت</button></div><div class="best">أفضل نتيجة <b>${this.save.best.toLocaleString("en")}</b></div>`;
       this.bind("start", this.actions.start);
       this.bind("levels", () => this.levels());
       this.bind("settings", () => this.settings());
       this.bind("help", () => this.help());
     }
     if (status === "paused") {
-      this.panel.innerHTML = `<div class="eyebrow">TAKE A BREATH</div><h1>استراحة قصيرة</h1><p>المسافة: ${Math.floor(p.z)} متر</p><button class="primary" id="resume">متابعة الركض</button><button id="menu">القائمة الرئيسية</button>`;
+      this.panel.innerHTML = `<div class="eyebrow">استراحة</div><h1>استراحة قصيرة</h1><p>المسافة: ${Math.floor(p.z)} متر</p><button class="primary" id="resume">متابعة الركض</button><button id="menu">القائمة الرئيسية</button>`;
       this.bind("resume", this.actions.pause);
       this.bind("menu", this.actions.menu);
     }
     if (status === "won" || status === "lost") {
-      this.panel.innerHTML = `<div class="eyebrow">${status === "won" ? "DISTRICT COMPLETE" : "ONE MORE RUN"}</div><h1>${status === "won" ? "وصلت بسلام!" : "جرّب مرة أخرى"}</h1><p>${status === "won" ? "أكملت مرحلة Downtown Rush." : "انتهت المحاولات. انتبه للحواجز والمسار المفتوح."}</p><div class="result"><b>${p.score}</b><span>نقطة · ${p.coins} طاقة · ${Math.floor(p.z)} متر</span></div><button class="primary" id="retry">اركض من جديد ↗</button><button id="menu">القائمة الرئيسية</button>`;
+      this.panel.innerHTML = `<div class="eyebrow">${status === "won" ? "تمت الجولة" : "جاهز للمحاولة؟"}</div><h1>${status === "won" ? "وصلت بسلام!" : "جرّب مرة أخرى"}</h1><p>${status === "won" ? "وصلت نهاية شارع السوق وجمعت الدولارات!" : "انتهت المحاولات. انتبه للحواجز والمسار المفتوح."}</p><div class="result"><b>${p.score}</b><span>نقطة · ${p.coins * 100} دولار · ${Math.floor(p.z)} متر</span></div><button class="primary" id="retry">اركض من جديد ↗</button><button id="menu">القائمة الرئيسية</button>`;
       this.bind("retry", this.actions.start);
       this.bind("menu", this.actions.menu);
     }
@@ -81,8 +81,8 @@ export class UIManager {
   }
   levels() {
     this.panel.innerHTML =
-      '<div class="eyebrow">THE ROUTE</div><h2>اختر المرحلة</h2><button id="level1" class="primary">01 · Downtown Rush ↗</button>' +
-      ["Highway Escape", "Construction Chaos", "Neon Night", "Final Chase"]
+      '<div class="eyebrow">THE ROUTE</div><h2>اختر المرحلة</h2><button id="level1" class="primary">01 · شارع السوق العراقي ↗</button>' +
+      ["طريق البصرة", "ورشة المقاولات", "ليالي بغداد", "طريق القرنة"]
         .map(
           (n, i) =>
             `<div class="locked">0${i + 2} · ${n}<small>قيد التطوير — غير قابلة للعب بعد</small></div>`,
@@ -115,7 +115,7 @@ export class UIManager {
   update(p: Runner, fps: number) {
     this.root.querySelector("#score")!.textContent =
       p.score.toLocaleString("en");
-    this.root.querySelector("#coins")!.textContent = String(p.coins);
+    this.root.querySelector("#coins")!.textContent = "$" + (p.coins * 100).toLocaleString("en-US");
     this.root.querySelector("#lives")!.textContent = "●".repeat(
       Math.max(0, p.lives),
     );
@@ -124,6 +124,6 @@ export class UIManager {
     this.root.querySelector("#hint")!.textContent =
       p.z < 35
         ? "اسحب للحركة · ↑ قفز · ↓ انزلاق"
-        : `${Math.floor(p.z)} / ${LEVEL_LENGTH} m · ${Math.round(fps)} FPS`;
+        : `${Math.floor(p.z)} / ${LEVEL_LENGTH} م · ${Math.round(p.speed * 3.6)} كم/س · ${Math.round(fps)} FPS`;
   }
 }

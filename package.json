@@ -1,7 +1,7 @@
 {
-  "name": "silver-rush-3d",
+  "name": "iraqi-dollar-runner-3d",
   "version": "0.1.0",
-  "description": "Silver Rush 3D — phase 1 playable vertical slice",
+  "description": "صايد الدولار 3D — لعبة ركض عراقية للمتصفح",
   "main": "index.js",
   "directories": {
     "doc": "docs",

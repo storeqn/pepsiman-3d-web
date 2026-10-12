@@ -463,3 +463,37 @@ input {
     display: none;
   }
 }
+
+/* Dollar Runner identity — warm daytime Basra market, emerald and brass UI. */
+:root { color:#fff8e7; background:#122a32; }
+#app { background:linear-gradient(270deg,#071d22ef 0%,#092934c7 32%,#0a273369 57%,transparent 85%); }
+.brand { gap:14px; direction:rtl; text-shadow:0 2px 15px #0a242f; }
+.brand > div { font-size:clamp(21px,2.5vw,30px);letter-spacing:0; }
+.brand > div > span {font-weight:900;color:#edc968;}
+.brand small {letter-spacing:0;font-size:11px;color:#f0debb;}
+.brand-icon {color:#edc968;font-size:48px;filter:drop-shadow(0 2px 9px #7e5c15aa);}
+.eyebrow {color:#ffdb7a;letter-spacing:0;font-size:12px;font-weight:bold;}
+h1 em,.result b,.level-tag > span,.best b {color:#ffda74;}
+h1 {font-size:clamp(42px,4.8vw,67px);text-shadow:0 4px 22px #06161b9c;}
+.tagline {font-weight:900;font-size:clamp(18px,2.4vw,23px);color:#ffda74;margin:0 0 14px;}
+.primary {background:linear-gradient(120deg,#ffe191,#dba83c);color:#132c28;border-radius:13px;box-shadow:0 8px 28px #050f1266;}
+.primary:hover {background:linear-gradient(120deg,#fff1c0,#f1c661);}
+button {border-radius:10px;background:#1c4948df;}
+button:hover {background:#276259;}
+button:focus-visible,select:focus-visible {outline-color:#f6d269;}
+.stats {background:#0b322fdc;border:1px solid #e8c98077;border-radius:16px;backdrop-filter:blur(10px);}
+.stats b {color:#ffe49a;}
+.progress i {background:#f1c661;}
+#hint {background:#0a3937bb;}
+#touch button {background:#15403cc9;border:1px solid #f1ce7155;font-weight:800;}
+#toast {background:#123f35f2;color:#ffe5a3;border:1px solid #eaca7570;}
+input {accent-color:#edc968;}
+.loading {background:#0b2c2c;}
+@media (max-width:650px) {
+  main {background:linear-gradient(110deg,#072322d9,#0b2e31f5);border:1px solid #edc96844;}
+  .brand > div {font-size:18px;}
+  .brand-icon {font-size:35px;}
+  .stats {gap:7px;padding:12px 10px;}
+  .stats b {font-size:16px;}
+  .tagline {font-size:19px;}
+}
