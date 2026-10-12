@@ -217,6 +217,10 @@ export class WorldStreaming {
           5,
           0.75,
         );
+        // Arabic shopfront text and painted metal shutters.
+        this.sign(root,["بصرة الخير","دكان أبو علي","عصائر رمان","مطعم العافية"][(index+n)%4],side*9.8,4.94,z-8.59,5.3,0.75);
+        this.box(root,"market-shutter-post",side*7.1,1.45,z+4.3,0.12,2.2,0.12,this.orange);
+        this.box(root,"market-shutter-post",side*7.1,1.45,z-4.3,0.12,2.2,0.12,this.orange);
         this.box(
           root,
           "lamp pole",
