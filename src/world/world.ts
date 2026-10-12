@@ -302,6 +302,22 @@ export class WorldStreaming {
         );
       }
     }
+    // Wires and utility poles outside collision lanes.
+    for (const side of [-1,1]) {
+      for (const z of [5,35]) {
+        this.box(root,"electricity-pole",side*6.82,3.8,z,0.18,7.6,0.18,this.rubber);
+        this.box(root,"electric-crossarm",side*6.82,6.9,z,1.1,0.13,0.13,this.concrete);
+      }
+      for(const dx of [-0.35,0.35]) {
+        const cable=MeshBuilder.CreateLines("hanging-cable",{points:[
+          new Vector3(side*6.82+dx,6.82,5),
+          new Vector3(side*6.82+dx,6.22,20),
+          new Vector3(side*6.82+dx,6.82,35)
+        ]},this.scene);
+        cable.color=Color3.FromHexString("#414342");
+        cable.parent=root;
+      }
+    }
     // Non-interactive roadside dressing stays outside the runner's collision lanes.
     // All components join the existing per-material static batching below.
     if (index % 2 === 0) {
