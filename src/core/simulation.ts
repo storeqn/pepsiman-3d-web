@@ -19,6 +19,7 @@ export interface Runner {
   coins: number;
   score: number;
   elapsed: number;
+  speed: number;
 }
 export type ObstacleKind = "barrier" | "beam" | "car" | "coin";
 export interface Obstacle {
@@ -41,7 +42,12 @@ export const initialRunner = (): Runner => ({
   coins: 0,
   score: 0,
   elapsed: 0,
+  speed: 14,
 });
+/** Fast launch plus restrained acceleration; enough road remains visible at top speed. */
+export const speedAt = (z: number, elapsed: number): number =>
+  14 + 3 * (1 - Math.exp(-Math.max(0, elapsed) * 0.7)) + Math.min(4, Math.max(0, z) / 550);
+
 export function stepRunner(p: Runner, input: Input, dt: number) {
   p.elapsed += dt;
   p.invincible = Math.max(0, p.invincible - dt);
@@ -56,7 +62,8 @@ export function stepRunner(p: Runner, input: Input, dt: number) {
   if (input.slide && p.y === 0) p.slide = 0.8;
   p.y = Math.max(0, p.y + p.vy * dt);
   p.vy = p.y > 0 ? p.vy - 22 * dt : 0;
-  p.z = Math.min(LEVEL_LENGTH, p.z + (11 + Math.min(3, p.z / 800)) * dt);
+  p.speed = speedAt(p.z, p.elapsed);
+  p.z = Math.min(LEVEL_LENGTH, p.z + p.speed * dt);
   p.score = Math.floor(p.z) * 2 + p.coins * 100;
 }
 export function overlaps(p: Runner, o: Obstacle, previousZ: number) {
@@ -75,7 +82,8 @@ export function overlaps(p: Runner, o: Obstacle, previousZ: number) {
 }
 // Every encounter leaves at least 3.8 m of road clear, with > 1.5 s lead time.
 export function encounter(index: number): Obstacle[] {
-  const z = 45 + index * 27;
+  // 38-metre gaps give at least 1.8 s between encounters even at maximum speed.
+  const z = 45 + index * 38;
   const x = [-2.8, 0, 2.8, 0][index % 4];
   const kind: ObstacleKind = (
     ["barrier", "car", "beam", "barrier", "beam"] as const

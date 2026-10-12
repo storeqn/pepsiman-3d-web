@@ -27,7 +27,9 @@ export class CameraController {
     const target = new Vector3(p.x * 0.3, 1.65 + p.y * 0.16, p.z + (portrait ? 16 : 19));
     Vector3.LerpToRef(this.focus, target, aimFollow, this.focus);
     this.camera.setTarget(this.focus);
-    this.camera.fov = portrait ? 0.99 : 0.9;
+    const boost = Math.min(0.075, Math.max(0, (p.speed - 14) * 0.011));
+    const wantedFov = (portrait ? 0.95 : 0.87) + boost;
+    this.camera.fov += (wantedFov - this.camera.fov) * Math.min(1, dt * 4);
   }
   reset() {
     this.camera.position.set(0, 4.5, -9);

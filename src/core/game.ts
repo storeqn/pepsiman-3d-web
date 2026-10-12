@@ -50,13 +50,13 @@ export class Game {
     if (this.engine.webGLVersion < 2)
       throw new Error("تحتاج اللعبة إلى متصفح يدعم WebGL2.");
     this.scene = new Scene(this.engine);
-    this.scene.clearColor = new Color4(0.66, 0.79, 0.82, 1);
+    this.scene.clearColor = new Color4(0.62, 0.81, 0.98, 1);
     this.scene.fogMode = Scene.FOGMODE_LINEAR;
-    this.scene.fogStart = 95;
-    this.scene.fogEnd = 215;
-    this.scene.fogColor = new Color3(0.66, 0.79, 0.82);
+    this.scene.fogStart = 118;
+    this.scene.fogEnd = 245;
+    this.scene.fogColor = new Color3(0.62, 0.81, 0.98);
     this.scene.imageProcessingConfiguration.toneMappingEnabled = true;
-    this.scene.imageProcessingConfiguration.exposure = 1.05;
+    this.scene.imageProcessingConfiguration.exposure = 1.1;
     this.scene.imageProcessingConfiguration.contrast = 1.12;
     this.scene.environmentTexture = CubeTexture.CreateFromImages(
       ["px", "py", "pz", "nx", "ny", "nz"].map(
@@ -66,7 +66,7 @@ export class Game {
     );
     this.scene.environmentIntensity = 0.75;
     const ambient = new HemisphericLight("sky", Vector3.Up(), this.scene);
-    ambient.intensity = 0.85;
+    ambient.intensity = 0.98;
     ambient.groundColor = new Color3(0.33, 0.36, 0.32);
     const sun = new DirectionalLight(
       "sun",
@@ -74,7 +74,7 @@ export class Game {
       this.scene,
     );
     sun.position.set(30, 55, -30);
-    sun.intensity = 1.6;
+    sun.intensity = 1.55;
     sun.diffuse = new Color3(1, 0.9, 0.74);
     sun.autoCalcShadowZBounds = true;
     sun.shadowMinZ = 1;
@@ -186,7 +186,9 @@ export class Game {
       if (obstacle.kind === "coin") {
         obstacle.hit = true;
         this.runner.coins++;
-        this.audio.tone(900, 0.09);
+        this.world.collect(obstacle.id);
+        this.audio.tone(1100, 0.08);
+        this.audio.tone(1460, 0.1, this.audio.effects * 0.55);
       } else if (this.runner.invincible === 0) {
         obstacle.hit = true;
         this.runner.lives--;
