@@ -282,6 +282,36 @@ export class WorldStreaming {
         );
       }
     }
+    // Non-interactive roadside dressing stays outside the runner's collision lanes.
+    // All components join the existing per-material static batching below.
+    if (index % 2 === 0) {
+      const side = index % 4 === 0 ? -1 : 1;
+      const x = side * 6.45;
+      this.box(root, "signal pole", x, 2.9, 35, 0.13, 5.6, 0.13, this.rubber);
+      this.box(root, "signal arm", side * 5.8, 5.55, 35, 1.4, 0.12, 0.12, this.rubber);
+      this.box(root, "signal housing", side * 5.2, 5.15, 35, 0.48, 1.24, 0.42, this.rubber);
+      this.box(root, "signal red", side * 5.2, 5.48, 34.77, 0.22, 0.22, 0.03, this.orange);
+      this.box(root, "signal amber", side * 5.2, 5.14, 34.77, 0.22, 0.22, 0.03, this.gold);
+      this.box(root, "signal green", side * 5.2, 4.8, 34.77, 0.22, 0.22, 0.03, this.green);
+    }
+    if (index % 3 === 1) {
+      const side = index % 2 ? 1 : -1;
+      // Parked delivery vehicle on the outside of the raised sidewalk.
+      const x = side * 8.1;
+      this.box(root, "delivery truck box", x, 1.58, 15, 1.85, 2.15, 4.1, this.white);
+      this.box(root, "delivery truck cab", x, 1.03, 11.9, 1.8, 1.55, 1.8, this.blue);
+      this.box(root, "delivery windshield", x, 1.38, 10.97, 1.42, 0.72, 0.05, this.glass);
+      for (const z of [12, 16]) {
+        this.box(root, "wheel left", x - 0.92, 0.44, z, 0.17, 0.72, 0.72, this.rubber);
+        this.box(root, "wheel right", x + 0.92, 0.44, z, 0.17, 0.72, 0.72, this.rubber);
+      }
+    }
+    // Repeated facade details share materials so the merge step avoids excess draw calls.
+    for (const side of [-1, 1]) {
+      this.box(root, "store threshold", side * 6.95, 0.28, 20, 0.8, 0.12, 7, this.white);
+      this.box(root, "street bollard", side * 5.55, 0.52, 28, 0.17, 1.04, 0.17, this.rubber);
+      this.box(root, "street bollard highlight", side * 5.55, 0.85, 28, 0.18, 0.12, 0.18, this.orange);
+    }
     for (let z = 2; z < 40; z += 6)
       this.box(root, "lane marking", 0, 0.015, z, 0.12, 0.018, 2.6, this.white);
     if (index % 3 === 0)
