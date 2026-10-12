@@ -6,9 +6,10 @@ import { material } from "./materials";
 import type { Runner } from "../core/simulation";
 export class AnimationSystem {
   root: TransformNode;
+  hinges: TransformNode[] = [];
   limbs: TransformNode[] = [];
   constructor(scene: Scene) {
-    this.root = new TransformNode("temporary-articulated-runner", scene);
+    this.root = new TransformNode("silver-runner-procedural-rig", scene);
     const silver = material(scene, "silver armor", "#b9cbd3", 0.82, 0.28),
       blue = material(scene, "cobalt panels", "#07658e", 0.55, 0.3),
       dark = material(scene, "joints", "#13232d", 0.3, 0.5);
@@ -21,7 +22,7 @@ export class AnimationSystem {
     ) => {
       const m = MeshBuilder.CreateSphere(
         name,
-        { diameter: 1, segments: 16 },
+        { diameter: 1, segments: 24 },
         scene,
       );
       m.parent = parent;
@@ -30,6 +31,12 @@ export class AnimationSystem {
       m.material = mat;
       return m;
     };
+    // Original procedural armor pass; no third-party meshes or unlicensed assets.
+    const glow = material(scene, "reactor glow", "#18bdf1", 0.25, 0.16);
+    glow.emissiveColor = blue.albedoColor.scale(0.8);
+    part("chest reactor", new Vector3(0, 1.43, 0.36), new Vector3(0.2, 0.2, 0.07), glow);
+    part("helmet crest", new Vector3(0, 2.31, -0.03), new Vector3(0.23, 0.08, 0.35), blue);
+    part("collar", new Vector3(0, 1.79, 0), new Vector3(0.49, 0.15, 0.44), dark);
     part("rib armor", new Vector3(0, 1.37, 0), new Vector3(0.73, 0.69, 0.4));
     part(
       "abdominal suit",
@@ -73,6 +80,7 @@ export class AnimationSystem {
         );
         const lower = new TransformNode("hinge", scene);
         lower.parent = pivot;
+        this.hinges.push(lower);
         lower.position.y = -0.4;
         lower.rotation.x = arm ? -0.5 : 0.25;
         part(
@@ -103,8 +111,12 @@ export class AnimationSystem {
     this.root.position.set(p.x, p.y, p.z);
     this.root.rotation.z = -p.vx * 0.025;
     this.root.rotation.x = p.slide > 0 ? -1.1 : 0.06;
-    this.root.scaling.y = p.slide > 0 ? 0.5 : 1;
+    this.root.scaling.y += ((p.slide > 0 ? 0.55 : 1) - this.root.scaling.y) * 0.28;
     const phase = p.elapsed * 13;
+    this.hinges.forEach((h, i) => {
+      const airborne = p.y > 0.1;
+      h.rotation.x = p.slide > 0 ? 1.1 : airborne ? (i % 2 ? 0.85 : 0.45) : 0.25 + Math.max(0, Math.sin(phase + i * Math.PI)) * 0.95;
+    });
     this.limbs.forEach(
       (l, i) =>
         (l.rotation.x = moving
