@@ -1,9 +1,11 @@
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { Scene } from "@babylonjs/core/scene";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { material } from "./materials";
 import type { Runner } from "../core/simulation";
+
+/** Original articulated Iraqi outfit rig. An artist-made skinned GLB remains a future upgrade. */
 export class AnimationSystem {
   root: TransformNode;
   hinges: TransformNode[] = [];
@@ -11,139 +13,92 @@ export class AnimationSystem {
   private impactPulse = 0;
   private lastInvincible = 0;
   constructor(scene: Scene) {
-    this.root = new TransformNode("silver-runner-procedural-rig", scene);
-    const silver = material(scene, "silver armor", "#b9cbd3", 0.82, 0.28),
-      blue = material(scene, "cobalt panels", "#07658e", 0.55, 0.3),
-      dark = material(scene, "joints", "#13232d", 0.3, 0.5);
-    const part = (
-      name: string,
-      position: Vector3,
-      scale: Vector3,
-      mat = silver,
-      parent = this.root,
-    ) => {
-      const m = MeshBuilder.CreateSphere(
-        name,
-        { diameter: 1, segments: 24 },
-        scene,
-      );
-      m.parent = parent;
-      m.position = position;
-      m.scaling = scale;
-      m.material = mat;
-      return m;
+    this.root = new TransformNode("iraqi-runner-rig", scene);
+    const thobe = material(scene, "cotton-thobe", "#f7f2e6", 0, 0.88);
+    const seams = material(scene, "stitched-cotton", "#c9c2b4", 0, 0.88);
+    const skin = material(scene, "warm-skin", "#bc8764", 0, 0.84);
+    const black = material(scene, "black-agal", "#191917", 0.05, 0.7);
+    const red = material(scene, "shemagh-red", "#ac2428", 0, 0.87);
+    const shoe = material(scene, "brown-shoes", "#483126", 0.08, 0.8);
+    const eye = material(scene, "eyes", "#211815", 0.04, 0.55);
+    const el = (name: string, x: number, y: number, z: number, a: number, b: number, c: number, mat = thobe, parent = this.root) => {
+      const m = MeshBuilder.CreateSphere(name, {diameter: 1, segments: 16}, scene);
+      m.parent = parent; m.position.set(x,y,z); m.scaling.set(a,b,c); m.material = mat; return m;
     };
-    // Original procedural armor pass; no third-party meshes or unlicensed assets.
-    const glow = material(scene, "reactor glow", "#18bdf1", 0.25, 0.16);
-    glow.emissiveColor = blue.albedoColor.scale(0.8);
-    part("chest reactor", new Vector3(0, 1.43, 0.36), new Vector3(0.2, 0.2, 0.07), glow);
-    part("helmet crest", new Vector3(0, 2.31, -0.03), new Vector3(0.23, 0.08, 0.35), blue);
-    // Self-authored aerodynamic plates and armor accents. No borrowed models.
-    for (const side of [-1, 1]) {
-      part("shoulder armor", new Vector3(side * 0.54, 1.64, 0), new Vector3(0.3, 0.24, 0.42), silver);
-      part("shoulder blue inset", new Vector3(side * 0.57, 1.67, 0.19), new Vector3(0.19, 0.1, 0.085), blue);
-      part("thigh accent", new Vector3(side * 0.22, 0.75, 0.18), new Vector3(0.13, 0.29, 0.065), blue);
-      part("shin accent", new Vector3(side * 0.22, 0.38, 0.19), new Vector3(0.11, 0.2, 0.065), silver);
+    const box = (name: string, x: number,y: number,z: number,w: number,h: number,d: number,mat=thobe,parent=this.root) => {
+      const m=MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},scene);
+      m.parent=parent;m.position.set(x,y,z);m.material=mat;return m;
+    };
+    const cone = (name:string,x:number,y:number,z:number,top:number,bottom:number,h:number,mat=thobe,parent=this.root) => {
+      const m=MeshBuilder.CreateCylinder(name,{diameterTop:top,diameterBottom:bottom,height:h,tessellation:24},scene);
+      m.parent=parent;m.position.set(x,y,z);m.material=mat;return m;
+    };
+    cone("flowing-long-white-dishdasha",0,1.2,0,0.7,1.12,1.5);
+    cone("shoulders",0,1.86,0,0.64,0.7,0.23);
+    cone("collar",0,2.03,0,0.34,0.4,0.14,seams);
+    box("front-placket",0,1.72,0.36,0.06,0.4,0.03,seams);
+    for(const y of [1.6,1.72,1.84]) el("button",0,y,0.386,0.022,0.022,0.02,seams);
+    for(let i=0;i<12;i++){
+      const angle=i*Math.PI/6;
+      const fold=box("hem-pleat",Math.sin(angle)*0.53,0.59,Math.cos(angle)*0.53,0.025,0.35,0.028,seams);
+      fold.rotation.y=angle;
     }
-    part("visor highlight", new Vector3(0, 2.025, 0.305), new Vector3(0.27, 0.045, 0.025), glow);
-    part("upper chest plate", new Vector3(0, 1.54, 0.32), new Vector3(0.5, 0.19, 0.1), silver);
-    part("collar", new Vector3(0, 1.79, 0), new Vector3(0.49, 0.15, 0.44), dark);
-    part("rib armor", new Vector3(0, 1.37, 0), new Vector3(0.73, 0.69, 0.4));
-    part(
-      "abdominal suit",
-      new Vector3(0, 1.06, 0),
-      new Vector3(0.46, 0.42, 0.32),
-      blue,
-    );
-    part("hips", new Vector3(0, 0.91, 0), new Vector3(0.55, 0.27, 0.36), dark);
-    part("helmet", new Vector3(0, 1.92, 0), new Vector3(0.43, 0.51, 0.44));
-    part(
-      "visor",
-      new Vector3(0, 1.98, 0.19),
-      new Vector3(0.35, 0.16, 0.14),
-      blue,
-    );
-    part(
-      "spine light",
-      new Vector3(0, 1.4, -0.215),
-      new Vector3(0.12, 0.44, 0.07),
-      blue,
-    );
-    for (const side of [-1, 1]) {
-      for (const arm of [false, true]) {
-        const pivot = new TransformNode(arm ? "shoulder" : "hip", scene);
-        pivot.parent = this.root;
-        pivot.position.set(side * (arm ? 0.43 : 0.19), arm ? 1.61 : 0.94, 0);
+    el("face",0,2.36,0.045,0.32,0.4,0.3,skin);
+    for(const side of [-1,1]){
+      el("ear",side*0.3,2.32,0.02,0.085,0.13,0.07,skin);
+      el("eye",side*0.13,2.38,0.323,0.047,0.032,0.026,eye);
+      el("brow",side*0.13,2.44,0.302,0.105,0.025,0.03,black);
+      el("mustache",side*0.067,2.17,0.339,0.085,0.036,0.044,black);
+    }
+    el("nose",0,2.28,0.348,0.065,0.11,0.085,skin);
+    el("chin",0,2.08,0.25,0.18,0.06,0.1,skin);
+    cone("white-shemagh-crown",0,2.68,0,0.65,0.72,0.24);
+    // Alternating broad red woven panels and long hanging corners of the shemagh.
+    for(let i=0;i<12;i++){
+      const a=i*Math.PI/6;
+      const stripe=box("shemagh-red-head-weave",Math.sin(a)*0.342,2.68,Math.cos(a)*0.342,0.047,0.22,0.032,i%3===0?red:thobe);
+      stripe.rotation.y=a;
+    }
+    for(const side of [-1,1]){
+      const drop=box("shemagh-side-tail",side*0.34,2.35,-0.13,0.19,0.61,0.28,thobe);
+      drop.rotation.z=side*0.09;
+      box("shemagh-red-tail-stripe",side*0.35,2.24,-0.287,0.07,0.52,0.025,red);
+    }
+    box("shemagh-back-cloth",0,2.37,-0.29,0.65,0.69,0.065);
+    for(const x of [-0.24,0,0.24]) box("red-back-pattern",x,2.36,-0.33,0.045,0.65,0.015,red);
+    for(const y of [2.15,2.38,2.58])box("red-back-cross-stitch",0,y,-0.34,0.62,0.035,0.015,red);
+    for(const y of [2.72,2.78]){
+      const ring=MeshBuilder.CreateTorus("double-black-agal",{diameter:0.7,thickness:0.085,tessellation:32},scene);
+      ring.parent=this.root;ring.position.y=y;ring.material=black;
+    }
+    for(const side of [-1,1]){
+      for(const arm of [true,false]){
+        const pivot=new TransformNode(arm?"shoulder":"hip",scene);
+        pivot.parent=this.root;pivot.position.set(side*(arm?0.41:0.23),arm?1.78:0.73,0);
         this.limbs.push(pivot);
-        part(
-          "joint",
-          Vector3.Zero(),
-          new Vector3(0.19, 0.19, 0.19),
-          dark,
-          pivot,
-        );
-        part(
-          "upper armor",
-          new Vector3(0, -0.2, 0),
-          new Vector3(arm ? 0.19 : 0.25, 0.43, 0.22),
-          silver,
-          pivot,
-        );
-        const lower = new TransformNode("hinge", scene);
-        lower.parent = pivot;
-        this.hinges.push(lower);
-        lower.position.y = -0.4;
-        lower.rotation.x = arm ? -0.5 : 0.25;
-        part(
-          "hinge",
-          Vector3.Zero(),
-          new Vector3(0.18, 0.18, 0.18),
-          blue,
-          lower,
-        );
-        part(
-          "lower armor",
-          new Vector3(0, -0.18, 0),
-          new Vector3(0.18, 0.39, 0.21),
-          silver,
-          lower,
-        );
-        part(
-          arm ? "glove" : "boot",
-          new Vector3(0, -0.39, arm ? 0 : 0.09),
-          new Vector3(0.21, 0.17, arm ? 0.21 : 0.39),
-          dark,
-          lower,
-        );
+        cone(arm?"long-thobe-sleeve":"trouser",0,-0.21,0,arm?0.37:0.31,arm?0.28:0.26,0.43,thobe,pivot);
+        const hinge=new TransformNode(arm?"elbow":"knee",scene);
+        hinge.parent=pivot;hinge.position.y=-0.4;this.hinges.push(hinge);
+        cone("lower-limb",0,-0.16,0,0.26,0.22,0.32,thobe,hinge);
+        el(arm?"hand":"leather-shoe",0,-0.36,arm?0:0.12,arm?0.12:0.18,arm?0.13:0.12,arm?0.13:0.28,arm?skin:shoe,hinge);
       }
     }
   }
-  update(p: Runner, moving: boolean) {
-    this.root.position.set(p.x, p.y, p.z);
-    const struck = p.invincible > this.lastInvincible + 0.3;
-    if (struck) this.impactPulse = 1;
-    this.lastInvincible = p.invincible;
-    this.impactPulse *= 0.87;
-    this.root.rotation.z = -p.vx * 0.025 + Math.sin(p.elapsed * 32) * 0.12 * this.impactPulse;
-    const wantedPitch = p.slide > 0 ? -1.05 : p.y > 0.1 ? 0.13 : 0.04;
-    this.root.rotation.x += (wantedPitch - this.root.rotation.x) * 0.22;
-    this.root.scaling.y += ((p.slide > 0 ? 0.55 : 1) - this.root.scaling.y) * 0.28;
-    const phase = p.elapsed * 13;
-    const stride = moving && p.slide <= 0 ? 1 : 0;
-    this.hinges.forEach((h, i) => {
-      const airborne = p.y > 0.1;
-      h.rotation.x = p.slide > 0 ? 1.1 : airborne ? (i % 2 ? 0.85 : 0.45) : 0.25 + Math.max(0, Math.sin(phase + i * Math.PI)) * 0.95 * stride;
+  update(p:Runner,moving:boolean){
+    this.root.position.set(p.x,p.y,p.z);
+    if(p.invincible>this.lastInvincible+0.3)this.impactPulse=1;
+    this.lastInvincible=p.invincible;this.impactPulse*=0.86;
+    const phase=p.elapsed*Math.min(20,12+p.speed*0.26);
+    this.root.rotation.z=-p.vx*0.035+Math.sin(phase)*0.1*this.impactPulse;
+    const pitch=p.slide>0?-0.94:p.y>0.1?0.16:moving?0.07:0;
+    this.root.rotation.x+=(pitch-this.root.rotation.x)*0.22;
+    this.root.scaling.y+=((p.slide>0?0.57:1)-this.root.scaling.y)*0.28;
+    this.limbs.forEach((l,i)=>{
+      const stride=Math.sin(phase+(i<2?0:Math.PI))*0.78;
+      l.rotation.x=p.slide>0?-0.6:p.y>0?0.45:moving?stride*(i%2?-1:1):0;
     });
-    this.limbs.forEach(
-      (l, i) =>
-        (l.rotation.x = moving
-          ? p.y > 0
-            ? i % 2
-              ? 0.6
-              : -0.6
-            : Math.sin(phase + (i < 2 ? 0 : Math.PI) + (i % 2 ? Math.PI : 0)) *
-              0.7
-          : 0),
-    );
+    this.hinges.forEach((h,i)=>{
+      h.rotation.x=p.slide>0?1.12:p.y>0?0.6:moving?0.2+Math.max(0,Math.sin(phase+(i<2?0:Math.PI)))*0.9:0.2;
+    });
   }
 }
